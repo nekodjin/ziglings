@@ -41,7 +41,10 @@
 const print = @import("std").debug.print;
 
 // The grue is a nod to Zork.
-const TripError = error{ Unreachable, EatenByAGrue };
+const TripError = error {
+    Unreachable,
+    EatenByAGrue
+};
 
 // Let's start with the Places on the map. Each has a name and a
 // distance or difficulty of travel (as judged by the hermit).
@@ -55,12 +58,12 @@ const Place = struct {
     paths: []const Path = undefined,
 };
 
-var a = Place{ .name = "Archer's Point" };
-var b = Place{ .name = "Bridge" };
-var c = Place{ .name = "Cottage" };
-var d = Place{ .name = "Dogwood Grove" };
-var e = Place{ .name = "East Pond" };
-var f = Place{ .name = "Fox Pond" };
+var a = Place { .name = "Archer's Point" };
+var b = Place { .name = "Bridge" };
+var c = Place { .name = "Cottage" };
+var d = Place { .name = "Dogwood Grove" };
+var e = Place { .name = "East Pond" };
+var f = Place { .name = "Fox Pond" };
 
 //           The hermit's hand-drawn ASCII map
 //  +---------------------------------------------------+
@@ -192,8 +195,8 @@ const TripItem = union(enum) {
             // Oops! The hermit forgot how to capture the union values
             // in a switch statement. Please capture both values as
             // 'p' so the print statements work!
-            .place => print("{s}", .{p.name}),
-            .path => print("--{}->", .{p.dist}),
+            .place => |p| print("{s}", .{p.name}),
+            .path => |p| print("--{}->", .{p.dist}),
         }
     }
 };
@@ -255,7 +258,7 @@ const HermitsNotebook = struct {
             // dereference and optional value "unwrapping" look
             // together. Remember that you return the address with the
             // "&" operator.
-            if (place == entry.*.?.place) return entry;
+            if (place == entry.*.?.place) return &entry.*.?;
             // Try to make your answer this long:__________;
         }
         return null;
@@ -309,7 +312,7 @@ const HermitsNotebook = struct {
     //
     // Looks like the hermit forgot something in the return value of
     // this function. What could that be?
-    fn getTripTo(self: *HermitsNotebook, trip: []?TripItem, dest: *Place) void {
+    fn getTripTo(self: *HermitsNotebook, trip: []?TripItem, dest: *Place) !void {
         // We start at the destination entry.
         const destination_entry = self.getEntry(dest);
 
@@ -374,12 +377,13 @@ pub fn main() void {
     // checkNote() method above to see how this entry gets added to
     // the notebook.
     var notebook = HermitsNotebook{};
-    var working_note = NotebookEntry{
+    var working_note = NotebookEntry {
         .place = start,
         .coming_from = null,
         .via_path = null,
         .dist_to_reach = 0,
     };
+
     notebook.checkNote(working_note);
 
     // Get the next entry from the notebook (the first being the
